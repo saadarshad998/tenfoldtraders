@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tenfold Cars AI</title>
+    <meta charset="UTF-8" />
+
+    <script>
+    window.SUPABASE_URL = "https://qlzhnqbsscnxhgjpfaxx.supabase.co";
+    window.SUPABASE_ANON_KEY = "sb_publishable_aSjMp_pmI9GLYWC5CUQoIg_m0kFhELz";
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="/auth-guard.js"></script>
+    <script type="module" src="/logout.js"></script>
+
+
+
+
+    <style>
+
+    /* page hidden until auth verified */
+    html { display:none; }
+
+        body {
+            font-family: Arial;
+            margin: 40px;
+            background: #111;
+            color: white;
+        }
+
+        .chat {
+            height: 420px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .msg {
+            margin: 8px 0;
+            padding: 10px 14px;
+            border-radius: 16px;
+            width: fit-content;
+            max-width: 55%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+
+        .user {
+            background: #2d7ef7;
+            margin-left: auto;
+            text-align: left;
+        }
+
+        .bot {
+            background: #2a2a2a;
+            margin-right: auto;
+        }
+
+
+        .row {
+            display: flex;
+            gap: 8px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px 18px;
+            cursor: pointer;
+        }
+
+/* ================= UPDATE BUTTON ================= */
+
+/* ================= UPDATE BUTTON (MATCH PANEL THEME) ================= */
+
+#updateBtn {
+    grid-column: span 2;
+    margin-top: 14px; /* space from Notes field */
+
+    background: #1a1f2a;
+    border: 1px solid #2c3445;
+    color: #d6deed;
+
+    border-radius: 8px;
+    height: 36px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .4px;
+
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+/* hover */
+#updateBtn:hover {
+    background: #202634;
+    border-color: #3b4660;
+    color: #ffffff;
+}
+
+/* click */
+#updateBtn:active {
+    background: #151922;
+    border-color: #2a3244;
+}
+
+/* disabled feel (when hidden) */
+#updateBtn[style*="display: none"] {
+    pointer-events: none;
+}
+
+
+/* ================= CAR PANEL ================= */
+
+#carForm {
+    margin-top: 18px;
+    padding: 18px;
+    background: #181c24;
+    border: 1px solid #2a3040;
+    border-radius: 14px;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 420px));
+    gap: 12px 18px;
+    width: fit-content;
+}
+
+/* each field */
+.field {
+    display: flex;
+    flex-direction: column;
+}
+
+/* label */
+.field label {
+    font-size: 11px;
+    color: #8b93a6;
+    margin-bottom: 3px;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+}
+
+/* input */
+.field input {
+    background: #121620;
+    border: 1px solid #262c38;
+    color: #e8ecf1;
+    padding: 6px 9px;
+    border-radius: 6px;
+    font-size: 14px;
+    height: 30px;
+}
+
+/* readonly softer look */
+.field input[readonly] {
+    background: #0f131c;
+}
+
+/* hover feel */
+.field input:hover {
+    border-color: #3b4254;
+}
+
+/* ================= MONEY ================= */
+
+.money {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* currency symbol */
+.money span {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7e8799;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+/* input padding so text never overlaps £ */
+.money input {
+    padding-left: 24px;
+    font-weight: 600;
+    color: #dfe7ff;
+}
+
+
+/* ================= DROPDOWNS ================= */
+
+select {
+    background: #1a1f2a;
+    color: #e6e6e6;
+    border: 1px solid #2c3445;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* ================= CHAT POLISH ================= */
+
+.chat {
+    border: 1px solid #2a3040;
+}
+
+.radio-group {
+    display: flex;
+    gap: 18px;
+    margin-top: 6px;
+}
+
+.radio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #cfd6e4;
+}
+
+.radio input {
+    accent-color: #4ea1ff;
+    cursor: pointer;
+}
+
+
+.form-actions {
+    grid-column: span 2;
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+#cancelAddBtn {
+    background: #2b3448;
+    border: 1px solid #3b4660;
+    color: #cfd6e4;
+    border-radius: 8px;
+    height: 36px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#cancelAddBtn:hover {
+    background: #36415a;
+}
+
+#logoutBtn {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+
+    background: #1a1f2a;
+    border: 1px solid #2c3445;
+    color: #d6deed;
+
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    z-index: 9999;
+    transition: all .15s ease;
+}
+
+#logoutBtn:hover {
+    background: #202634;
+    border-color: #3b4660;
+    color: #fff;
+}
+
+#logoutBtn:active {
+    background: #151922;
+}
+
+    </style>
+</head>
+<body>
+<button id="logoutBtn">Sign out</button>
+
+<h1>Tenfold Cars AI</h1>
+
+<div id="chat" class="chat"></div>
+
+<div class="row">
+    <input id="question" placeholder="Ask about the dealership..." />
+    <button id="send">Send</button>
+    <button id="clear">Clear</button>
+</div>
+
+<hr>
+
+<div id="car-panel">
+
+    <label>Owner:</label>
+    <select id="ownerSelect">
+        <option value="">Select owner</option>
+        <option value="1">Umar Ali</option>
+        <option value="2">Uncle</option>
+        <option value="3">Brother in law</option>
+    </select>
+
+    <div id="carForm" style="display:none; margin-top:20px;">
+
+        <label>Registration:</label>
+        <select id="regSelect">
+            <option value="__none__" selected>— Select registration —</option>
+        </select>
+
+        <br><br>
+            <div class="field" id="newRegField" style="display:none;">
+                <label>Registration</label>
+                <input id="new_registration" maxlength="8" placeholder="AB12CDE">
+            </div>
+
+            <div class="field">
+                <label>Make</label>
+                <input id="make">
+            </div>
+
+            <div class="field">
+                <label>Model</label>
+                <input id="model">
+            </div>
+
+            <div class="field">
+                <label>Mileage</label>
+                <input id="mileage" inputmode="numeric" data-type="int">
+            </div>
+
+            <div class="field money">
+                <label>Purchase Price</label>
+                <span>£</span>
+                <input id="purchase_price" inputmode="decimal" data-type="decimal">
+            </div>
+
+            <div class="field money">
+                <label>Asking Price</label>
+                <span>£</span>
+                <input id="asking_price" inputmode="decimal" data-type="decimal">
+            </div>
+
+            <div class="field money">
+                <label>Transport Cost</label>
+                <span>£</span>
+                <input id="transport_cost" inputmode="decimal" data-type="decimal">
+            </div>
+
+            <div class="field money">
+                <label>Repair Cost</label>
+                <span>£</span>
+                <input id="repair_cost" inputmode="decimal" data-type="decimal">
+            </div>
+
+            <div class="field money">
+                <label>Total Cost</label>
+                <span>£</span>
+                <input id="total_cost" inputmode="decimal" data-type="decimal">
+            </div>
+
+            <div class="field money">
+                <label>Sale Price</label>
+                <span>£</span>
+                <input id="sale_price" inputmode="decimal" data-type="decimal">
+            </div>
+
+            <div class="field money">
+                <label>Profit</label>
+                <span>£</span>
+                <input id="profit" inputmode="decimal" data-type="decimal">
+            </div>
+
+            <div class="field">
+                <label>Status</label>
+
+                <div class="radio-group" id="status">
+                    <label class="radio">
+                        <input type="radio" name="status" value="stock">
+                        <span>Stock</span>
+                    </label>
+
+                    <label class="radio">
+                        <input type="radio" name="status" value="sold">
+                        <span>Sold</span>
+                    </label>
+                </div>
+            </div>
+
+
+            <div class="field">
+                <label>Purchase Date</label>
+            <input id="purchase_date" type="date">
+            </div>
+
+            <div class="field">
+                <label>Sold Date</label>
+                <input id="sold_date" type="date">
+            </div>
+
+            <div class="field">
+                <label>Notes</label>
+                <input id="notes">
+            </div>
+
+        <div class="form-actions">
+            <button id="updateBtn" style="display:none;">Update</button>
+            <button id="cancelAddBtn" style="display:none;" type="button">Cancel</button>
+        </div>
+
+
+
+    </div>
+
+</div>
+
+
+<script defer src="app.js"></script>
+</body>
+</html>
