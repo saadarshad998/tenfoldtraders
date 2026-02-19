@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 import pool from './db.js';
 import englishToSQL from './ai.js';
-import validateSQL from './validateSQL.js';
+import validateSQL from './validatesql.js';
 import respond from './respond.js';
 import routeMessage from './router.js';
 import chatResponse from './chat.js';
@@ -18,6 +18,13 @@ const conversations = new Map();
 
 
 const app = express();
+
+
+// simple request logger to help debug routing issues
+app.use((req, res, next) => {
+    console.log(`REQ ${req.method} ${req.url}`);
+    next();
+});
 
 
 app.use(cors());
@@ -228,11 +235,12 @@ app.put('/cars/:reg', async (req, res) => {
   values.push(reg);
 
   try {
-    await pool.query(
-      `UPDATE cars SET ${updates.join(", ")} WHERE registration = $${i}`,
-      values
-    );
-    res.json({ success: true });
+        const result = await pool.query(
+            `UPDATE cars SET ${updates.join(", ")} WHERE registration = $${i}`,
+            values
+        );
+        console.log('PUT /cars update', { reg, updates, values, rowCount: result.rowCount });
+        res.json({ success: true });
   } catch (err) {
     console.error(err);
     res.json({ success: false });
@@ -276,8 +284,9 @@ await pool.query(`
     toNull(car.notes)
 ]);
 
+        console.log('POST /cars inserted', { registration: car.registration, owner_id: car.owner_id });
 
-    res.json({ success:true });
+        res.json({ success:true });
   } catch (err) {
     console.error("POST /cars error:", err);
     res.status(500).json({ success:false, error: err.message });
@@ -286,6 +295,4 @@ await pool.query(`
 
 
 
-app.listen(3001, () => {
-    console.log('AI server running: http://localhost:3001');
-});
+export default app;

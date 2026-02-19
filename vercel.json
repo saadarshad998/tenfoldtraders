@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/ask", "destination": "/api/ask" },
+    { "source": "/cars", "destination": "/api/cars" },
+    { "source": "/cars/:reg", "destination": "/api/cars/:reg" },
+    { "source": "/cars/by-owner/:ownerId", "destination": "/api/cars/by-owner/:ownerId" }
+  ]
+}

@@ -257,8 +257,10 @@ carForm.querySelectorAll("input").forEach(i => {
 
 
 // set status radios
-const statusRadio = document.querySelector(`input[name="status"][value="${car.status}"]`);
+const status = (car.status || "").toLowerCase();
+const statusRadio = document.querySelector(`input[name="status"][value="${status}"]`);
 if (statusRadio) statusRadio.checked = true;
+
 
 });
 
@@ -373,17 +375,24 @@ if (addMode) {
     // confirmation
     if (!confirm("Create this vehicle?")) return;
 
-    // send to server
-    await fetch("/cars", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
+        // send to server
+        const res = await fetch("/cars", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
 
-    alert("Vehicle added");
+        const result = await res.json();
 
-    await exitAddMode();
-    return;
+        if (!result.success) {
+            alert("Failed to add vehicle:\n" + (result.error ?? "Unknown error"));
+            return;
+        }
+
+        alert("Vehicle added");
+        await exitAddMode();
+        return;
+
 }
 
 
@@ -394,17 +403,24 @@ if (addMode) {
 
     const data = collectFormData();
 
-    await fetch(`/cars/${regSelect.value}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
+const res = await fetch(`/cars/${regSelect.value}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+});
 
-    alert("Vehicle updated");
+const result = await res.json();
 
-    originalCar = structuredClone(data);
-    isDirty = false;
-    updateBtn.style.display = "none";
+if (!result.success) {
+    alert("Update failed");
+    return;
+}
+
+alert("Vehicle updated");
+originalCar = structuredClone(data);
+isDirty = false;
+updateBtn.style.display = "none";
+
 });
 
 
